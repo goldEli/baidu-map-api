@@ -25,19 +25,69 @@
   </body>
 </html>
 <script type="text/javascript">
-  // GL版命名空间为BMapGL
-  // 按住鼠标右键，修改倾斜角和角度
-  var map = new BMapGL.Map("allmap");
-  map.centerAndZoom(new BMapGL.Point(118.5, 27.5), 5);
-  map.enableScrollWheelZoom(true);
-  map.setMapType(BMAP_EARTH_MAP); // 设置地图类型为地球模式
-  var scaleCtrl = new BMapGL.ScaleControl({
-    anchor: BMAP_ANCHOR_TOP_LEFT,
-    offset: new BMapGL.Size(100, 10)
-  }); // 添加比例尺控件
-  map.addControl(scaleCtrl);
-  var zoomCtrl = new BMapGL.ZoomControl({
-    anchor: BMAP_ANCHOR_BOTTOM_LEFT
-  }); // 添加比例尺控件
-  map.addControl(zoomCtrl);
+  var map = new BMapGL.Map("allmap"); // 创建Map实例
+  var point = new BMapGL.Point(116.404, 39.915);
+  map.centerAndZoom(point, 12);
+  // map.enableScrollWheelZoom(true);
+  map.setMapStyleV2({
+    styleId: "556b6c846f130ec3ad0016f2eba410f6"
+  });
+  // var marker = new BMapGL.Marker(point);        // 创建标注
+  // map.addOverlay(marker);                     // 将标注添加到地图中
+  var myIcon = new BMapGL.Icon(
+    "https://www.youbaobao.xyz/datav-res/datav/location.png",
+    new BMapGL.Size(60, 60),
+    {
+      anchor: new BMapGL.Size(30, 30),
+      imageOffset: new BMapGL.Size(0, 0)
+    }
+  );
+  // 创建标注对象并添加到地图
+  var marker = new BMapGL.Marker(point, { icon: myIcon });
+  marker.addEventListener("click", function () {
+    var opts = {
+      width: 250, // 信息窗口宽度
+      height: 100, // 信息窗口高度
+      title: "标题" // 信息窗口标题
+    };
+    var infoWindow = new BMapGL.InfoWindow("内容", opts); // 创建信息窗口对象
+    map.openInfoWindow(infoWindow, point); // 打开信息窗口
+  });
+  map.addOverlay(marker);
+  var polyline = new BMapGL.Polyline(
+    [
+      new BMapGL.Point(116.399, 39.8),
+      new BMapGL.Point(116.405, 39.81),
+      new BMapGL.Point(116.425, 39.82)
+    ],
+    {
+      strokeColor: "blue",
+      strokeWeight: 2,
+      strokeOpacity: 0.5
+    }
+  );
+  map.addOverlay(polyline);
+  var content = "hello world!";
+  var label = new BMapGL.Label(content, {
+    // 创建文本标注
+    position: point, // 设置标注的地理位置
+    offset: new BMapGL.Size(200, 20) // 设置标注的偏移量
+  });
+  label.setStyle({
+    // 设置label的样式
+    width: "100px",
+    height: "20px",
+    padding: "20px",
+    color: "#fff",
+    fontSize: "20px",
+    border: "2px solid #1E90FF",
+    background: "red",
+    whiteSpace: "wrap",
+    overflow: "hidden",
+    lineHeight: "20px"
+  });
+  label.addEventListener("click", function (e) {
+    alert(e.target.content);
+  });
+  map.addOverlay(label); // 将标注添加到地图中
 </script>

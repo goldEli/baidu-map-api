@@ -24,23 +24,18 @@
     <script src="https://mapv.baidu.com/gl/examples/static/common.js"></script>
     <script src="https://mapv.baidu.com/build/mapv.js"></script>
     <script src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.54/dist/mapvgl.min.js"></script>
+    <script src="https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.54/dist/mapvgl.threelayers.min.js"></script>
     <title>地图展示</title>
   </head>
   <body>
     <div id="map_container"></div>
     <script type="text/javascript">
       var map = initMap({
-        tilt: 0,
+        tilt: 60,
         heading: 0,
         center: [103.438656, 25.753594],
-        zoom: 8,
-        style: snowStyle,
-        skyColors: [
-          // 地面颜色
-          "rgba(226, 237, 248, 0)",
-          // 天空颜色
-          "rgba(186, 211, 252, 1)"
-        ]
+        zoom: 6,
+        style: purpleStyle
       });
       setData(initData());
       function initData() {
@@ -78,22 +73,28 @@
           "拉萨",
           "海口"
         ];
-        var randomCount = 700;
+        var randomCount = 100; // 模拟的飞线的数量
+        var curve = new mapvgl.BezierCurve();
         // 构造数据
         while (randomCount--) {
-          var cityCenter = mapv.utilCityCenter.getCenterByCityName(
+          var startPoint = mapv.utilCityCenter.getCenterByCityName(
             citys[parseInt(Math.random() * citys.length, 10)]
           );
+          var endPoint = mapv.utilCityCenter.getCenterByCityName(
+            citys[parseInt(Math.random() * citys.length, 10)]
+          );
+          curve.setOptions({
+            start: [startPoint.lng, startPoint.lat],
+            end: [endPoint.lng, endPoint.lat]
+          });
+          var curveModelData = curve.getPoints();
           data.push({
             geometry: {
-              type: "Point",
-              coordinates: [
-                cityCenter.lng - 2 + Math.random() * 4,
-                cityCenter.lat - 2 + Math.random() * 4
-              ]
+              type: "LineString",
+              coordinates: curveModelData
             },
             properties: {
-              count: Math.random() * 100
+              count: Math.random()
             }
           });
         }
@@ -104,31 +105,18 @@
           map: map
         });
 
-        var intensity = new mapvgl.Intensity({
-          max: 100,
-          min: 0,
-          gradient: {
-            0: "rgb(25, 66, 102, 0.8)",
-            0.3: "rgb(145, 102, 129, 0.8)",
-            0.7: "rgb(210, 131, 137, 0.8)",
-            1: "rgb(248, 177, 149, 0.8)"
+        var flylineLayer = new mapvgl.FlyLineLayer({
+          style: "chaos",
+          step: 0.3,
+          color: "rgba(33, 242, 214, 0.3)",
+          textureColor: function (data) {
+            return data.properties.count > 0.5 ? "#ff0000" : "#56ccdd";
           },
-          maxSize: 30,
-          minSize: 5
+          textureWidth: 20,
+          textureLength: 10
         });
-
-        var pointLayer = new mapvgl.PointLayer({
-          blend: "lighter",
-          size: function (data) {
-            return intensity.getSize(data.properties.count);
-          },
-          color: function (data) {
-            return intensity.getColor(data.properties.count);
-          }
-        });
-
-        view.addLayer(pointLayer);
-        pointLayer.setData(data);
+        view.addLayer(flylineLayer);
+        flylineLayer.setData(data);
       }
     </script>
   </body>
